@@ -16,8 +16,6 @@ private:
     static const unsigned BOARD_WIDTH = 9;
     static const unsigned BOARD_SIZE = BOARD_WIDTH*BOARD_WIDTH;
     unsigned m_board[BOARD_SIZE];
-    unsigned m_current_pos;
-    unsigned m_strategicAssignmentList[BOARD_SIZE];
     unsigned m_depth;
     unsigned getX(unsigned pos) const;
     unsigned getY(unsigned pos) const;
@@ -32,11 +30,10 @@ private:
 
 // implementation
 Sudoku::Sudoku()
-    : m_current_pos(0), m_depth(0)
+    :  m_depth(0)
 {
     for (unsigned pos = 0; pos < BOARD_SIZE; ++ pos) {
         m_board[pos] = 0;
-        m_strategicAssignmentList[pos] = pos;
     }
 }
 
