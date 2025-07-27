@@ -11,6 +11,7 @@ public:
     void print() const;
     bool solve();
     bool hasOnlyOneSolution() const;
+    float getDifficultyLevel() const;
 
 private:
     static const unsigned FREE_CELL = 0;
@@ -19,6 +20,8 @@ private:
     static const unsigned BOARD_SIZE = BOARD_WIDTH * BOARD_WIDTH;
     unsigned m_board[BOARD_SIZE];
     unsigned m_depth;
+    unsigned m_tryCount;
+
     unsigned getX(unsigned pos) const;
     unsigned getY(unsigned pos) const;
     unsigned int getPos(unsigned x, unsigned y) const;
@@ -33,7 +36,7 @@ private:
 
 // implementation
 Sudoku::Sudoku()
-    : m_depth(0)
+    : m_depth(0), m_tryCount(0)
 {
     for (unsigned pos = 0; pos < BOARD_SIZE; ++pos) {
         m_board[pos] = FREE_CELL;
@@ -92,6 +95,7 @@ void Sudoku::print() const
 
 bool Sudoku::solve()
 {
+    m_tryCount = 0;
     unsigned pos = getFirstFreePos();
     // then try to solve this one
     unsigned number;
@@ -130,6 +134,11 @@ bool Sudoku::hasOnlyOneSolution() const
         pos = getNextFreePos(pos);
     };
     return hasUniqueSolution;
+}
+
+float Sudoku::getDifficultyLevel() const
+{
+    return m_tryCount / static_cast<float>(BOARD_SIZE);
 }
 
 unsigned Sudoku::getX(unsigned pos) const
@@ -230,6 +239,7 @@ unsigned Sudoku::getOptimalFreePos() const
 bool Sudoku::tryNumber(unsigned number, unsigned pos)
 {
     ++m_depth;
+    ++m_tryCount;
 
 #ifdef DEBUG
     // indent according to depth
@@ -311,8 +321,9 @@ int main()
     Sudoku initial_sudoku = sudoku;
     bool solved = sudoku.solve();
     if (solved) {
-        std::cout << "Result: " << std::endl;
+        std::cout << "Result: (difficulty=" << sudoku.getDifficultyLevel() << ")"  << std::endl;
         sudoku.print();
+
         if (initial_sudoku.hasOnlyOneSolution()) {
             std::cout << "This is the only solution" << std::endl;
         } else {
