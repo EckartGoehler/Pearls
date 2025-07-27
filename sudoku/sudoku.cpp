@@ -13,6 +13,7 @@ public:
     bool hasOnlyOneSolution() const;
 
 private:
+    static const unsigned FREE_CELL = 0;
     static const unsigned NUMBER_RANGE = 9;
     static const unsigned BOARD_WIDTH = 9;
     static const unsigned BOARD_SIZE = BOARD_WIDTH * BOARD_WIDTH;
@@ -35,7 +36,7 @@ Sudoku::Sudoku()
     : m_depth(0)
 {
     for (unsigned pos = 0; pos < BOARD_SIZE; ++pos) {
-        m_board[pos] = 0;
+        m_board[pos] = FREE_CELL;
     }
 }
 
@@ -162,7 +163,7 @@ bool Sudoku::setNum(unsigned pos, unsigned number)
 unsigned Sudoku::getFirstFreePos() const
 {
     unsigned pos;
-    for (pos = 0; pos < BOARD_SIZE && m_board[pos] != 0; ++pos) {
+    for (pos = 0; pos < BOARD_SIZE && m_board[pos] != FREE_CELL; ++pos) {
         // search
     }
     return pos;
@@ -171,7 +172,7 @@ unsigned Sudoku::getFirstFreePos() const
 unsigned Sudoku::getNextFreePos(unsigned pos) const
 {
     ++pos;
-    for (; pos < BOARD_SIZE && m_board[pos] != 0; ++pos) {
+    for (; pos < BOARD_SIZE && m_board[pos] != FREE_CELL; ++pos) {
         // search
     }
     return pos;
@@ -182,7 +183,7 @@ unsigned Sudoku::getOptimalFreePos() const
     unsigned best_pos = BOARD_SIZE;
     unsigned rating = 0;
     for (unsigned pos = 0; pos < BOARD_SIZE; ++pos) {
-        if (m_board[pos] == 0) {
+        if (m_board[pos] == FREE_CELL) {
             // initial setup
             if (best_pos == BOARD_SIZE) {
                 best_pos = pos;
@@ -192,14 +193,14 @@ unsigned Sudoku::getOptimalFreePos() const
 
             // look for occupied cells in current row
             for (unsigned x = 0; x < BOARD_WIDTH; ++x) {
-                if (x != x0 && m_board[getPos(x, y0)] != 0) {
+                if (x != x0 && m_board[getPos(x, y0)] != FREE_CELL) {
                     current_rating++;
                 }
             }
 
             // look for occupied cells in current column
             for (unsigned y = 0; y < BOARD_WIDTH; ++y) {
-                if (y != y0 && m_board[getPos(x0, y)] != 0) {
+                if (y != y0 && m_board[getPos(x0, y)] != FREE_CELL) {
                     current_rating++;
                 }
             }
@@ -208,7 +209,7 @@ unsigned Sudoku::getOptimalFreePos() const
             unsigned by = (y0 / 3) * 3;
             for (unsigned x = 0; x < 3; ++x) {
                 for (unsigned y = 0; y < 3; ++y) {
-                    if (m_board[getPos(bx + x, by + y)] != 0) {
+                    if (m_board[getPos(bx + x, by + y)] != FREE_CELL) {
                         current_rating++;
                     }
                 }
@@ -252,7 +253,7 @@ bool Sudoku::tryNumber(unsigned number, unsigned pos)
             }
             // no valid solution found -> revert
             if (!success) {
-                m_board[pos] = 0;
+                m_board[pos] = FREE_CELL;
             }
         }
         // otherwise -> we are done
