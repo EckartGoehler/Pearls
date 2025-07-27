@@ -1,7 +1,8 @@
 // simple recursive sudoku solver
 #include <iostream>
 
-//#define DEBUG
+// #define DEBUG
+
 class Sudoku {
 
 public:
@@ -14,7 +15,7 @@ public:
 private:
     static const unsigned NUMBER_RANGE = 9;
     static const unsigned BOARD_WIDTH = 9;
-    static const unsigned BOARD_SIZE = BOARD_WIDTH*BOARD_WIDTH;
+    static const unsigned BOARD_SIZE = BOARD_WIDTH * BOARD_WIDTH;
     unsigned m_board[BOARD_SIZE];
     unsigned m_depth;
     unsigned getX(unsigned pos) const;
@@ -24,15 +25,16 @@ private:
     bool setNum(unsigned pos, unsigned number);
     unsigned getFirstFreePos() const;
     unsigned getNextFreePos(unsigned pos) const;
+    unsigned getOptimalFreePos() const;
     bool tryNumber(unsigned number, unsigned pos);
     bool isValid(unsigned number, unsigned pos) const;
 };
 
 // implementation
 Sudoku::Sudoku()
-    :  m_depth(0)
+    : m_depth(0)
 {
-    for (unsigned pos = 0; pos < BOARD_SIZE; ++ pos) {
+    for (unsigned pos = 0; pos < BOARD_SIZE; ++pos) {
         m_board[pos] = 0;
     }
 }
@@ -51,7 +53,7 @@ void Sudoku::fill()
             if (!isValid(number, getPos(col - 1, row - 1))) {
                 std::cout << " Error: number=" << number << " at x=" << col << " y=" << row << " is already occupied" << std::endl;
             } else {
-                unsigned pos = getPos(col-1,row-1);
+                unsigned pos = getPos(col - 1, row - 1);
                 m_board[pos] = number;
                 std::cout << "-> ok" << std::endl;
             }
@@ -71,7 +73,7 @@ void Sudoku::print() const
     for (int y = 0; y < BOARD_WIDTH; ++y) {
         std::cout << "| ";
         for (int x = 0; x < BOARD_WIDTH; ++x) {
-            std::cout << m_board[getPos(x,y)];
+            std::cout << m_board[getPos(x, y)];
             if (x % 3 == 2) {
                 std::cout << " | ";
             } else {
@@ -138,7 +140,7 @@ unsigned Sudoku::getY(unsigned pos) const
     return pos / BOARD_WIDTH;
 }
 
-unsigned int Sudoku::getPos(unsigned x, unsigned y) const 
+unsigned int Sudoku::getPos(unsigned x, unsigned y) const
 {
     return y * BOARD_WIDTH + x;
 }
@@ -157,7 +159,8 @@ bool Sudoku::setNum(unsigned pos, unsigned number)
         return false;
     }
 }
-unsigned Sudoku::getFirstFreePos() const {
+unsigned Sudoku::getFirstFreePos() const
+{
     unsigned pos;
     for (pos = 0; pos < BOARD_SIZE && m_board[pos] != 0; ++pos) {
         // search
@@ -174,6 +177,54 @@ unsigned Sudoku::getNextFreePos(unsigned pos) const
     return pos;
 }
 
+unsigned Sudoku::getOptimalFreePos() const
+{
+    unsigned best_pos = BOARD_SIZE;
+    unsigned rating = 0;
+    for (unsigned pos = 0; pos < BOARD_SIZE; ++pos) {
+        if (m_board[pos] == 0) {
+            // initial setup
+            if (best_pos == BOARD_SIZE) {
+                best_pos = pos;
+            }
+            unsigned x0 = getX(best_pos), y0 = getY(best_pos);
+            unsigned current_rating = 0;
+
+            // look for occupied cells in current row
+            for (unsigned x = 0; x < BOARD_WIDTH; ++x) {
+                if (x != x0 && m_board[getPos(x, y0)] != 0) {
+                    current_rating++;
+                }
+            }
+
+            // look for occupied cells in current column
+            for (unsigned y = 0; y < BOARD_WIDTH; ++y) {
+                if (y != y0 && m_board[getPos(x0, y)] != 0) {
+                    current_rating++;
+                }
+            }
+
+            unsigned bx = (x0 / 3) * 3;
+            unsigned by = (y0 / 3) * 3;
+            for (unsigned x = 0; x < 3; ++x) {
+                for (unsigned y = 0; y < 3; ++y) {
+                    if (m_board[getPos(bx + x, by + y)] != 0) {
+                        current_rating++;
+                    }
+                }
+            }
+            if (current_rating > rating) {
+                best_pos = pos;
+                rating = current_rating;
+#ifdef DEBUG
+                std::cout << "Found best pos: x=" << getX(best_pos) << " y=" << getY(best_pos) << " rating=" << rating << std::endl;
+#endif
+            }
+        }
+    }
+    return best_pos;
+}
+
 // return true when succeeding to feed in the given number and all follow up numbers
 bool Sudoku::tryNumber(unsigned number, unsigned pos)
 {
@@ -187,10 +238,10 @@ bool Sudoku::tryNumber(unsigned number, unsigned pos)
     std::cout << "[try_number] depth=" << m_depth << " x=" << getX(pos) << " y=" << getY(pos) << " number=" << number << std::endl;
 #endif
 
-    bool success = setNum(pos,number); // testwise allocate it
+    bool success = setNum(pos, number); // testwise allocate it
     if (success) {
 
-        unsigned nextPos = getNextFreePos(pos); 
+        unsigned nextPos = getOptimalFreePos();
 
         // if not completed -> look for further numbers
         if (nextPos < BOARD_SIZE) {
@@ -203,8 +254,8 @@ bool Sudoku::tryNumber(unsigned number, unsigned pos)
             if (!success) {
                 m_board[pos] = 0;
             }
-        } 
-        // otherwise -> we are done 
+        }
+        // otherwise -> we are done
     }
 
 #ifdef DEBUG
@@ -225,14 +276,14 @@ bool Sudoku::isValid(unsigned number, unsigned pos) const
 
     // same number in the current row elsewhere -> not valid
     for (unsigned x = 0; x < BOARD_WIDTH; ++x) {
-        if (x != x0 && m_board[getPos(x,y0)] == number) {
+        if (x != x0 && m_board[getPos(x, y0)] == number) {
             return false;
         }
     }
 
     // same number in the current column elsewhere -> not valid
     for (unsigned y = 0; y < BOARD_WIDTH; ++y) {
-        if (y != y0 && m_board[getPos(x0,y)] == number) {
+        if (y != y0 && m_board[getPos(x0, y)] == number) {
             return false;
         }
     }
@@ -243,7 +294,7 @@ bool Sudoku::isValid(unsigned number, unsigned pos) const
     unsigned by = (y0 / 3) * 3;
     for (unsigned x = 0; x < 3; ++x) {
         for (unsigned y = 0; y < 3; ++y) {
-            if (m_board[getPos(bx + x,by + y)] == number) {
+            if (m_board[getPos(bx + x, by + y)] == number) {
                 return false;
             }
         }
