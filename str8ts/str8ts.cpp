@@ -74,7 +74,7 @@ void Str8ts::fill()
                 std::cout << "-> ok" << std::endl;
             }
         } else {
-            std::cout << " Error: Invalid entry. Must be in [1..9]" << std::endl;
+            std::cout << " Error: Invalid entry at row=" << row << " col=" << col << " number=" << number <<  " Must be in [1..9]" << std::endl;
         }
     }
     std::cout << "Here the Str8ts setup: " << std::endl;
@@ -275,6 +275,60 @@ bool Str8ts::isValid(unsigned number, unsigned pos) const
 {
     unsigned x0 = getX(pos), y0 = getY(pos);
 
+    // same number in the current row elsewhere -> not valid
+    for (unsigned x = 0; x < BOARD_WIDTH; ++x) {
+        if (x != x0 && m_board[getPos(x, y0)].num == number) {
+            return false;
+        }
+    }
+
+    // same number in the current column elsewhere -> not valid
+    for (unsigned y = 0; y < BOARD_WIDTH; ++y) {
+        if (y != y0 && m_board[getPos(x0, y)].num == number) {
+            return false;
+        }
+    }
+
+    // str8ts conditions horizontal
+    // search to the right and left for min/max numbers and number of cells
+    unsigned min=0,max=0,count=0;
+    unsigned x = x0;
+    while (x > 0 && !m_board[getPos(x, y0)].blocked) {
+        --x;
+    }
+    for(; x < BOARD_WIDTH && !m_board[getPos(x, y0)].blocked;++x) {
+        ++count;
+        if (x != x0 && (min == 0 || m_board[getPos(x, y0)].num < min)) {
+            min = m_board[getPos(x, y0)].num;
+        }
+        if (x != x0 && (max == 0 || m_board[getPos(x, y0)].num < max)) {
+            max = m_board[getPos(x, y0)].num;
+        }
+        if (max - min > count-1) {
+            return false;
+        }
+    }
+
+    // str8ts conditions vertical
+    // search to the right and left for min/max numbers and number of cells
+    min=0,max=0,count=0;
+    unsigned y = y0;
+    while (y > 0 && !m_board[getPos(x0, y)].blocked) {
+        --y;
+    }
+    for(; y < BOARD_WIDTH && !m_board[getPos(x0, y)].blocked;++y) {
+        ++count;
+        if (y != y0 && (min == 0 || m_board[getPos(x0, y)].num < min)) {
+            min = m_board[getPos(x0, y)].num;
+        }
+        if (y != y0 && (max == 0 || m_board[getPos(x0, y)].num < max)) {
+            max = m_board[getPos(x0, y)].num;
+        }
+        if (max - min > count-1) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -282,18 +336,18 @@ int main()
 {
     Str8ts str8ts;
     str8ts.fill();
-    // Str8ts initial_str8ts = str8ts;
-    // bool solved = str8ts.solve();
-    // if (solved) {
-    //     std::cout << "Result: (difficulty=" << str8ts.getDifficultyLevel() << ")"  << std::endl;
-    //     str8ts.print();
+    Str8ts initial_str8ts = str8ts;
+    bool solved = str8ts.solve();
+    if (solved) {
+        std::cout << "Result: (difficulty=" << str8ts.getDifficultyLevel() << ")"  << std::endl;
+        str8ts.print();
 
     //     if (initial_str8ts.hasOnlyOneSolution()) {
     //         std::cout << "This is the only solution" << std::endl;
     //     } else {
     //         std::cout << "This is not the only solution" << std::endl;
     //     }
-    // } else {
-    //     std::cout << "This Str8ts is not solveable" << std::endl;
-    // }
+    } else {
+        std::cout << "This Str8ts is not solveable" << std::endl;
+    }
 }
