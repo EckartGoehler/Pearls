@@ -320,7 +320,7 @@ bool Str8ts::isValid(unsigned number, unsigned pos) const
     }
     for (; y < BOARD_WIDTH && !m_board[getPos(x0, y)].blocked; ++y) {
         ++count;
-        if (m_board[getPos(x, y0)].num == FREE_CELL) {
+        if (m_board[getPos(x0, y)].num == FREE_CELL) {
             continue;
         }
         if (y != y0 && (min == 0 || m_board[getPos(x0, y)].num < min)) {
