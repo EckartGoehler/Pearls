@@ -347,11 +347,11 @@ int main()
         std::cout << "Result: (difficulty=" << str8ts.getDifficultyLevel() << ")" << std::endl;
         str8ts.print();
 
-        //     if (initial_str8ts.hasOnlyOneSolution()) {
-        //         std::cout << "This is the only solution" << std::endl;
-        //     } else {
-        //         std::cout << "This is not the only solution" << std::endl;
-        //     }
+        if (initial_str8ts.hasOnlyOneSolution()) {
+            std::cout << "This is the only solution" << std::endl;
+        } else {
+            std::cout << "This is not the only solution" << std::endl;
+        }
     } else {
         std::cout << "This Str8ts is not solveable" << std::endl;
     }
