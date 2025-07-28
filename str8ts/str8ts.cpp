@@ -52,7 +52,7 @@ Str8ts::Str8ts()
 void Str8ts::fill()
 {
     int row, col, number;
-    std::cout << "Please enter row column and number (0 for block, 1..9 as number, space separated), 0 to stop" << std::endl;
+    std::cout << "Please enter row column and number (1..9 as number, 0 or negative to block, space separated), 0 to stop" << std::endl;
     while (true) {
         std::cin >> row;
         if (row <= 0) {
@@ -60,12 +60,12 @@ void Str8ts::fill()
         }
         bool blocked = false;
         std::cin >> col >> number;
-        if (number == 0) {
+        if (number <= 0) {
             blocked = true;
-            std::cin >> number;
+            number = -number;
         }
         if (row <= BOARD_WIDTH && col > 0 && col <= BOARD_WIDTH && (number > 0 || blocked) && number <= NUMBER_RANGE) {
-            if (!isValid(number, getPos(col - 1, row - 1))) {
+            if (!blocked && !isValid(number, getPos(col - 1, row - 1))) {
                 std::cout << " Error: number=" << number << " at x=" << col << " y=" << row << " is already occupied" << std::endl;
             } else {
                 unsigned pos = getPos(col - 1, row - 1);
